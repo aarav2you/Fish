@@ -1,1 +1,1 @@
-siteLookUp = {1: "Outlook"}
+siteLookUp = {1: "Outlook" , 2:"Discord", 3:"Managebac"}
