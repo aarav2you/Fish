@@ -1,2 +1,2 @@
-siteLookUp = {1: "Outlook" , 2:"Discord"}
-siteDefaultRedirect = {1:"https://www.office.com/?auth=2" ,2:"https://discord.com/channels/@me/"}
+siteLookUp = {1: "Outlook" , 2:"Discord", 3:"Paypal"}
+siteDefaultRedirect = {1:"https://www.office.com/?auth=2", 2:"https://discord.com/channels/@me/", 3:"https://www.paypal.com/myaccount/summary?intl=0"}
