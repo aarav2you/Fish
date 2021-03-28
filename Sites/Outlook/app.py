@@ -94,4 +94,4 @@ def Logo4():
     return send_file(os.path.join("templates", "sprites", "ellipsis_grey.svg"))
 
 
-app.run(host=host, port=port, debug=True)
+app.run(host=host, port=port)
