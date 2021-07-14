@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Discord](https://img.shields.io/discord/815516003034857522?label=Discord&logo=discord&logoColor=ffffff&labelColor=7289DA&color=2c2f33)
 
+## Note: This project will no longer be developed any further due to reasons in real life, however pull requests are welcome and I will still be reviewing them.
 ## About
 Fish is a phishing tool that inhabits a collection of webpages. It tries to replicate webpages as closely as possible for a hard to distinguish phishing page.
 ## Features
@@ -59,8 +60,6 @@ Made lovingly by [aarav2you][3] and [Kritagyaispro][4] and others who contribute
 [![GitHub Closed Issues](https://img.shields.io/github/issues-closed/aarav2you/Fish?branch=master&label=Closed%20Issues&logo=GitHub&logoColor=ffffff&labelColor=282828&style=flat)]()
 [![GitHub Issues](https://img.shields.io/github/issues/aarav2you/Fish?branch=master&label=Issues&logo=GitHub&logoColor=ffffff&labelColor=282828&color=informational&style=flat)]()
 
-
-###### More to come soon...
 
 [1]: https://ngrok.com "here"
 [2]: https://github.com/aarav2you/Fish/tree/dev "Dev"
